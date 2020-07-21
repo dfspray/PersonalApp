@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private PlayerView playerView;
     private static boolean fullscreen = false;
     private Context context = this;
-    private static String url = "rtmp://255.255.255.255:1935/usr/pass";
+    private static String url = "rtmp://255.255.255.255:1935/live/test";
     Button sourceEditButton;
     ImageView refreshButton;
     ImageView fullscreenButton;
@@ -147,67 +148,9 @@ public class MainActivity extends AppCompatActivity {
             player = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
             playerView = findViewById(R.id.simple_player);
 
-            //Refresh button control
-            refreshButton = playerView.findViewById(R.id.exo_refresh);
-            refreshButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //refreshButton.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_refresh));
-                    //getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-                    setVideoSource(url);
-                }
-            });
+            this.setupRefresh();
 
-            //Fullscreen button control
-            fullscreenButton = playerView.findViewById(R.id.exo_fullscreen_icon);
-            fullscreenButton.setOnClickListener(new View.OnClickListener() {
-                @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-                @Override
-                public void onClick(View view) {
-                    View bottomNav = findViewById(R.id.nav_view);
-                    if(fullscreen) {
-                        fullscreenButton.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fullscreen_open));
-
-                        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-
-                        if(getSupportActionBar() != null){
-                            getSupportActionBar().show();
-                        }
-
-                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) playerView.getLayoutParams();
-                        params.width = pxToDp(384);
-                        params.height = pxToDp(216);
-                        params.topMargin = pxToDp(5);
-                        playerView.setLayoutParams(params);
-                        bottomNav.setVisibility(View.VISIBLE);
-
-                        fullscreen = false;
-                    } else {
-                        fullscreenButton.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fullscreen_close));
-
-                        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
-                                |View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                                |View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-
-                        if(getSupportActionBar() != null){
-                            getSupportActionBar().hide();
-                        }
-
-                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-
-                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) playerView.getLayoutParams();
-                        params.width = params.MATCH_PARENT;
-                        params.height = params.MATCH_PARENT;
-                        params.topMargin = 0;
-                        playerView.setLayoutParams(params);
-
-                        fullscreen = true;
-                        bottomNav.setVisibility(View.INVISIBLE);
-                    }
-                }
-            });
+            this.setupFullscreen();
 
             //Setup media source
             playerView.setPlayer(player);
@@ -216,6 +159,91 @@ public class MainActivity extends AppCompatActivity {
             logger.warning("Error setting up player or importing rtmp stream");
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Sets up refresh button functionality
+     */
+    private void setupRefresh() {
+        refreshButton = playerView.findViewById(R.id.exo_refresh_icon);
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setVideoSource(url);
+            }
+        });
+    }
+
+    /**
+     * Sets up fullscreen button functionality
+     */
+    private void setupFullscreen() {
+        fullscreenButton = playerView.findViewById(R.id.exo_fullscreen_icon);
+        fullscreenButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onClick(View view) {
+                View bottomNav = findViewById(R.id.nav_view);
+                View button1 = findViewById(R.id.buttonPrompt1);
+                View button2 = findViewById(R.id.buttonPrompt2);
+                View button3 = findViewById(R.id.buttonPrompt3);
+                BottomNavigationView navView = findViewById(R.id.nav_view);
+                View fragment = findViewById(R.id.nav_host_fragment);
+
+                if(fullscreen) {
+                    fullscreenButton.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fullscreen_open));
+
+                    getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+
+                    if(getSupportActionBar() != null){
+                        getSupportActionBar().show();
+                    }
+
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) playerView.getLayoutParams();
+                    params.width = pxToDp(384);
+                    params.height = pxToDp(216);
+                    params.topMargin = pxToDp(5);
+                    playerView.setLayoutParams(params);
+                    bottomNav.setVisibility(View.VISIBLE);
+                    button1.setVisibility(View.VISIBLE);
+                    button2.setVisibility(View.VISIBLE);
+                    button3.setVisibility(View.VISIBLE);
+                    navView.setVisibility(View.VISIBLE);
+                    fragment.setVisibility(View.VISIBLE);
+
+                    fullscreen = false;
+                } else {
+                    fullscreenButton.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fullscreen_close));
+
+                    getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
+                            |View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            |View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+                    if(getSupportActionBar() != null){
+                        getSupportActionBar().hide();
+                    }
+
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) playerView.getLayoutParams();
+                    params.width = params.MATCH_PARENT;
+                    params.height = params.MATCH_PARENT;
+                    params.topMargin = 0;
+                    params.bottomMargin = 0;
+                    playerView.setLayoutParams(params);
+
+                    fullscreen = true;
+                    bottomNav.setVisibility(View.INVISIBLE);
+                    button1.setVisibility(View.INVISIBLE);
+                    button2.setVisibility(View.INVISIBLE);
+                    button3.setVisibility(View.INVISIBLE);
+                    navView.setVisibility(View.INVISIBLE);
+                    fragment.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
     }
 
     /**
